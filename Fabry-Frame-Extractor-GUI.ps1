@@ -330,7 +330,23 @@ $btnStart.Add_Click({
         if ($chkSharpen.Checked -and -not $useCuda) { $vf += "unsharp=$($txtSharpenParams.Text)" }
         elseif ($chkSharpen.Checked -and $useCuda) { $txtLog.AppendText("[!] CUDA attivo: sharpening ignorato`r`n") }
         
-        if ($chkInterval.Checked) { $vf += "fps=1/$($txtInterval.Text)" }
+        if ($chkInterval.Checked) { 
+            # Assicuriamoci che il formato sia yuv420p prima di applicare fps
+            if ($useCuda) {
+                # Se non abbiamo già scaricato il frame (es. nessun upscale), fallo ora
+                if ($vf -notcontains "hwdownload,format=nv12") {
+                    $vf += "hwdownload,format=nv12"
+                }
+                if ($vf -notcontains "format=yuv420p") {
+                    $vf += "format=yuv420p"
+                }
+            }
+            $vf += "fps=1/$($txtInterval.Text)" 
+        } elseif ($useCuda -and $vf -notcontains "format=yuv420p") {
+            # Se non c'è fps e non c'è upscale, ma c'è CUDA, dobbiamo comunque scaricare il frame per il JPG
+            $vf += "hwdownload,format=nv12"
+            $vf += "format=yuv420p"
+        }
         if ($vf.Count -gt 0) { $ffArgs += "-vf"; $ffArgs += ($vf -join ",") }
         
         $ffArgs += "-q:v"; $ffArgs += $txtQuality.Text

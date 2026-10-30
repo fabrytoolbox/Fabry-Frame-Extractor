@@ -1,4 +1,9 @@
 # Changelog
+## [2.6.0] - 2026-10-30
+
+### Fixed
+- Risolto il conflitto di formati (errore -40) quando si usa CUDA insieme al filtro `fps`.
+- Migliorata la gestione dello scarico dei frame dalla GPU alla CPU per il salvataggio in JPG.
 
 ## [1.0.0] - 2025-01-25
 
